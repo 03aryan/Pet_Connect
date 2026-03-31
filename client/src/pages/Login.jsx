@@ -1,31 +1,58 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { PawIcon, MailIcon, LockIcon, EyeIcon, EyeOffIcon } from '../icons';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { PawIcon, MailIcon, LockIcon, EyeIcon, EyeOffIcon } from "../icons";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
-  const [form, setForm] = useState({ email: '', password: '' });
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [showPw, setShowPw] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const update = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
+    if (submitError) setSubmitError("");
   };
 
   const validate = () => {
     const errs = {};
-    if (!form.email.trim()) errs.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Enter a valid email';
-    if (!form.password) errs.password = 'Password is required';
-    else if (form.password.length < 6) errs.password = 'Must be at least 6 characters';
+    if (!form.email.trim()) errs.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(form.email))
+      errs.email = "Enter a valid email";
+    if (!form.password) errs.password = "Password is required";
+    else if (form.password.length < 6)
+      errs.password = "Must be at least 6 characters";
     return errs;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     const errs = validate();
-    if (Object.keys(errs).length) return setErrors(errs);
-    console.log('Login:', form);
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
+
+    setErrors({});
+    setSubmitError("");
+    setIsSubmitting(true);
+
+    try {
+      await login(form);
+      navigate("/", { replace: true });
+    } catch (error) {
+      setSubmitError(
+        error.message || "Unable to log in right now. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -49,18 +76,21 @@ export default function Login() {
 
           <h2 className="text-3xl font-bold text-white mb-3">Welcome Back!</h2>
           <p className="text-white/75 text-base leading-relaxed">
-            Your furry friends are waiting. Log in to reconnect with the
-            Pet Connect community.
+            Your furry friends are waiting. Log in to reconnect with the Pet
+            Connect community.
           </p>
 
           {/* Floating stats */}
           <div className="mt-10 grid grid-cols-3 gap-4">
             {[
-              { count: '10k+', label: 'Pets Adopted' },
-              { count: '5k+', label: 'Happy Owners' },
-              { count: '200+', label: 'Verified Vets' },
+              { count: "10k+", label: "Pets Adopted" },
+              { count: "5k+", label: "Happy Owners" },
+              { count: "200+", label: "Verified Vets" },
             ].map((s) => (
-              <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-xl py-3 px-2">
+              <div
+                key={s.label}
+                className="bg-white/10 backdrop-blur-sm rounded-xl py-3 px-2"
+              >
                 <p className="text-xl font-bold text-white">{s.count}</p>
                 <p className="text-[11px] text-white/60 mt-0.5">{s.label}</p>
               </div>
@@ -75,18 +105,29 @@ export default function Login() {
           {/* Brand */}
           <Link to="/" className="flex items-center gap-2 mb-10 group">
             <PawIcon className="w-8 h-8 text-primary group-hover:text-primary-dark transition-colors" />
-            <span className="text-2xl font-bold text-primary-dark">Pet Connect</span>
+            <span className="text-2xl font-bold text-primary-dark">
+              Pet Connect
+            </span>
           </Link>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-1">Log In</h1>
-          <p className="text-gray-500 mb-8">Don't have an account?{' '}
-            <Link to="/signup" className="font-semibold text-primary hover:text-primary-dark transition-colors">Sign Up</Link>
+          <p className="text-gray-500 mb-8">
+            Don't have an account?{" "}
+            <Link
+              to="/signup"
+              className="font-semibold text-primary hover:text-primary-dark transition-colors"
+            >
+              Sign Up
+            </Link>
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             {/* Email */}
             <div>
-              <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label
+                htmlFor="login-email"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
+              >
                 Email Address
               </label>
               <div className="relative">
@@ -96,59 +137,83 @@ export default function Login() {
                   type="email"
                   autoComplete="email"
                   value={form.email}
-                  onChange={update('email')}
+                  onChange={update("email")}
                   placeholder="you@example.com"
-                  className={`w-full pl-11 pr-4 py-3 rounded-xl border text-sm bg-white outline-none transition-all duration-200 focus:ring-2 focus:ring-primary/30 focus:border-primary ${errors.email ? 'border-red-400' : 'border-beige-dark/50'}`}
+                  className={`w-full pl-11 pr-4 py-3 rounded-xl border text-sm bg-white outline-none transition-all duration-200 focus:ring-2 focus:ring-primary/30 focus:border-primary ${errors.email ? "border-red-400" : "border-beige-dark/50"}`}
                 />
               </div>
-              {errors.email && <p className="text-xs text-red-500 mt-1.5">{errors.email}</p>}
+              {errors.email && (
+                <p className="text-xs text-red-500 mt-1.5">{errors.email}</p>
+              )}
             </div>
 
             {/* Password */}
             <div>
-              <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label
+                htmlFor="login-password"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
+              >
                 Password
               </label>
               <div className="relative">
                 <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-beige-darker" />
                 <input
                   id="login-password"
-                  type={showPw ? 'text' : 'password'}
+                  type={showPw ? "text" : "password"}
                   autoComplete="current-password"
                   value={form.password}
-                  onChange={update('password')}
+                  onChange={update("password")}
                   placeholder="••••••••"
-                  className={`w-full pl-11 pr-11 py-3 rounded-xl border text-sm bg-white outline-none transition-all duration-200 focus:ring-2 focus:ring-primary/30 focus:border-primary ${errors.password ? 'border-red-400' : 'border-beige-dark/50'}`}
+                  className={`w-full pl-11 pr-11 py-3 rounded-xl border text-sm bg-white outline-none transition-all duration-200 focus:ring-2 focus:ring-primary/30 focus:border-primary ${errors.password ? "border-red-400" : "border-beige-dark/50"}`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPw(!showPw)}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-beige-darker hover:text-primary-dark transition-colors"
-                  aria-label={showPw ? 'Hide password' : 'Show password'}
+                  aria-label={showPw ? "Hide password" : "Show password"}
                 >
-                  {showPw ? <EyeOffIcon className="w-[18px] h-[18px]" /> : <EyeIcon className="w-[18px] h-[18px]" />}
+                  {showPw ? (
+                    <EyeOffIcon className="w-[18px] h-[18px]" />
+                  ) : (
+                    <EyeIcon className="w-[18px] h-[18px]" />
+                  )}
                 </button>
               </div>
-              {errors.password && <p className="text-xs text-red-500 mt-1.5">{errors.password}</p>}
+              {errors.password && (
+                <p className="text-xs text-red-500 mt-1.5">{errors.password}</p>
+              )}
             </div>
 
             {/* Remember / Forgot */}
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input type="checkbox" className="w-4 h-4 rounded border-beige-dark/50 text-primary accent-primary" />
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-beige-dark/50 text-primary accent-primary"
+                />
                 <span className="text-gray-600">Remember me</span>
               </label>
-              <button type="button" className="font-medium text-primary hover:text-primary-dark transition-colors">
+              <button
+                type="button"
+                className="font-medium text-primary hover:text-primary-dark transition-colors"
+              >
                 Forgot password?
               </button>
             </div>
 
+            {submitError && (
+              <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+                {submitError}
+              </p>
+            )}
+
             <button
               type="submit"
               id="login-submit-btn"
-              className="w-full py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-primary to-primary-dark rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35 hover:from-primary-dark hover:to-primary-deeper transition-all duration-300 active:scale-[0.98]"
+              disabled={isSubmitting}
+              className="w-full py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-primary to-primary-dark rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35 hover:from-primary-dark hover:to-primary-deeper transition-all duration-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Log In
+              {isSubmitting ? "Logging In..." : "Log In"}
             </button>
           </form>
 
@@ -158,7 +223,9 @@ export default function Login() {
               <div className="w-full border-t border-beige-dark/30" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-surface px-4 text-xs text-gray-400 uppercase tracking-wider">or continue with</span>
+              <span className="bg-surface px-4 text-xs text-gray-400 uppercase tracking-wider">
+                or continue with
+              </span>
             </div>
           </div>
 
