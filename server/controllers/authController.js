@@ -21,21 +21,36 @@ const sanitizeUser = (user) => ({
   createdAt: user.createdAt,
 });
 
-/* ── POST /api/auth/register ────────────────────── */
+/* ── POST /api/auth/signup  &  /api/auth/register ── */
 exports.register = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // Check if user already exists
-    const exists = await User.findOne({ email: email?.toLowerCase() });
+    // Explicit validation — return clean 400 before touching the DB
+    if (!name || String(name).trim().length < 2) {
+      return res.status(400).json({ message: 'Name must be at least 2 characters' });
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: 'A valid email address is required' });
+    }
+    if (!password || String(password).length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
+
+    // Check for duplicate email
+    const exists = await User.findOne({ email: email.toLowerCase() });
     if (exists) {
       return res.status(409).json({ message: 'Email is already registered' });
     }
 
     // Create user (password hashed by pre-save hook)
-    const user = await User.create({ name, email, password, role });
+    const user = await User.create({
+      name: String(name).trim(),
+      email,
+      password,
+      role: role || 'owner',
+    });
 
-    // Generate token
     const token = signToken(user._id);
 
     res.status(201).json({

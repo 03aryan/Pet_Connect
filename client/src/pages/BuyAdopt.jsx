@@ -255,20 +255,29 @@ export default function BuyAdopt() {
           ) : null}
 
           {!loading && !error && pets.length > 0 ? (
-            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5 stagger-grid">
               {pets.map((pet) => {
                 const Icon = iconMap[pet.species] || PawIcon;
                 return (
                   <div
                     key={pet._id}
-                    className="group relative bg-white/50 backdrop-blur-md rounded-2xl border border-beige-dark/20 shadow-sm hover:shadow-xl hover:shadow-primary/8 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                    className="group relative glass-card rounded-2xl overflow-hidden animate-fade-in-up"
                   >
-                    {/* Image placeholder */}
-                    <div className="relative h-44 bg-gradient-to-br from-beige-light/60 to-secondary/20 flex items-center justify-center">
-                      <Icon className="w-16 h-16 text-primary/30 group-hover:text-primary/50 transition-colors duration-300" />
-                      <div className="absolute top-3 left-3">
+                    {/* Image / Banner */}
+                    <div className="relative h-44 bg-gradient-to-br from-beige-light/60 to-secondary/20 flex items-center justify-center overflow-hidden">
+                      {pet.imageURL ? (
+                        <img 
+                          src={pet.imageURL} 
+                          alt={pet.name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <Icon className="w-16 h-16 text-primary/30 group-hover:text-primary/50 group-hover:scale-110 transition-all duration-300" />
+                      )}
+                      
+                      <div className="absolute top-3 left-3 z-10">
                         <span
-                          className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-lg ${
+                          className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-lg backdrop-blur-md ${
                             pet.status === "buy"
                               ? "bg-primary/90 text-white"
                               : "bg-secondary/90 text-primary-dark"
@@ -277,7 +286,7 @@ export default function BuyAdopt() {
                           {pet.status === "buy" ? "Buy" : "Rent"}
                         </span>
                       </div>
-                      <button className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 text-gray-400 hover:text-red-400 hover:bg-white transition-all duration-200">
+                      <button className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-md text-gray-400 hover:text-red-400 hover:bg-white hover:scale-110 transition-all duration-200">
                         <HeartIcon className="w-4 h-4" />
                       </button>
                     </div>

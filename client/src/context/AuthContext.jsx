@@ -2,7 +2,9 @@ import { createContext, useContext, useMemo, useState } from "react";
 
 const AuthContext = createContext(null);
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+// Empty string = use Vite proxy in dev (/api → localhost:5000)
+// Set VITE_API_URL for production deployment
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 const TOKEN_STORAGE_KEY = "pet_connect_token";
 const USER_STORAGE_KEY = "pet_connect_user";
 
@@ -103,28 +105,21 @@ export function AuthProvider({ children }) {
   };
 
   const signup = async (formData) => {
+    // Support both {name} (from Signup.jsx) and {firstName, lastName} forms
+    const name = (
+      formData.name ||
+      [formData.firstName, formData.lastName].filter(Boolean).join(" ")
+    ).trim();
+
     const payload = {
-      name: [formData.firstName, formData.lastName]
-        .filter(Boolean)
-        .join(" ")
-        .trim(),
+      name,
       email: formData.email,
       password: formData.password,
-      role: formData.role,
+      role: formData.role || "owner",
     };
 
-    const primaryUrl = `${API_BASE_URL}/api/auth/signup`;
-    const fallbackUrl = `${API_BASE_URL}/api/auth/register`;
-
-    try {
-      const data = await requestJson(primaryUrl, payload);
-      return applyAuthResponse(data);
-    } catch (error) {
-      if (error.status !== 404) throw error;
-
-      const data = await requestJson(fallbackUrl, payload);
-      return applyAuthResponse(data);
-    }
+    const data = await requestJson(`${API_BASE_URL}/api/auth/signup`, payload);
+    return applyAuthResponse(data);
   };
 
   const logout = () => {

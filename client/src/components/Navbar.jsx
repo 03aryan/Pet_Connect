@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { PawIcon } from "../icons";
 import { useAuth } from "../context/AuthContext";
@@ -13,6 +13,7 @@ const baseNavLinks = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const navLinks = isAuthenticated
     ? [...baseNavLinks, { to: "/my-activity", label: "My Activity" }]
@@ -20,28 +21,56 @@ export default function Navbar() {
 
   const firstName = user?.firstName || user?.name?.split(" ")[0] || "Friend";
 
+  // Scroll-aware shrink
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const handleLogout = () => {
     logout();
     setMobileOpen(false);
   };
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-xl bg-white/75 border-b border-beige-dark/20 shadow-sm shadow-beige-dark/5">
+    <nav
+      className={`sticky top-0 z-50 border-b transition-all duration-300 ${
+        scrolled
+          ? "bg-white/90 backdrop-blur-xl border-beige-dark/30 shadow-md shadow-beige-dark/10"
+          : "bg-white/75 backdrop-blur-xl border-beige-dark/20 shadow-sm shadow-beige-dark/5"
+      }`}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div
+          className={`flex items-center justify-between transition-all duration-300 ${
+            scrolled ? "h-13" : "h-16"
+          }`}
+        >
           {/* ── Logo ─────────────────────────────── */}
           <Link
             to="/"
             className="flex items-center gap-2.5 group"
             aria-label="Pet Connect Home"
           >
-            <PawIcon className="w-7 h-7 text-primary group-hover:text-primary-dark transition-colors duration-300" />
-            <span className="text-xl font-bold tracking-tight text-primary-dark group-hover:text-primary-deeper transition-colors duration-300">
+            <div className="relative">
+              <PawIcon
+                className={`text-primary group-hover:text-primary-dark transition-all duration-300 ${
+                  scrolled ? "w-6 h-6" : "w-7 h-7"
+                }`}
+              />
+              <div className="absolute -inset-1 rounded-full bg-primary/10 scale-0 group-hover:scale-100 transition-transform duration-300" />
+            </div>
+            <span
+              className={`font-bold tracking-tight text-primary-dark group-hover:text-primary-deeper transition-all duration-300 ${
+                scrolled ? "text-lg" : "text-xl"
+              }`}
+            >
               Pet Connect
             </span>
           </Link>
 
-          {/* ── Desktop Links ────────────────────── */}
+          {/* ── Desktop Links ─────────────────────────── */}
           <div className="hidden lg:flex items-center gap-0.5">
             {navLinks.map(({ to, label }) => (
               <NavLink
@@ -49,14 +78,23 @@ export default function Navbar() {
                 to={to}
                 end={to === "/"}
                 className={({ isActive }) =>
-                  `relative px-4 py-2 text-[13px] font-medium rounded-lg transition-all duration-300 ${
+                  `relative px-4 py-2 text-[13px] font-medium rounded-lg transition-all duration-200 group ${
                     isActive
-                      ? "text-primary-dark bg-primary/10"
+                      ? "text-primary-dark"
                       : "text-gray-500 hover:text-primary-dark hover:bg-beige/50"
                   }`
                 }
               >
-                {label}
+                {({ isActive }) => (
+                  <>
+                    {label}
+                    <span
+                      className={`absolute bottom-0.5 left-3 right-3 h-0.5 rounded-full bg-primary transition-all duration-300 ${
+                        isActive ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
+                      }`}
+                    />
+                  </>
+                )}
               </NavLink>
             ))}
           </div>
@@ -82,7 +120,7 @@ export default function Navbar() {
                 )}
 
                 <span className="px-4 py-2 text-sm font-semibold text-primary-dark border border-beige-dark/40 bg-beige/40 rounded-xl">
-                  Welcome, {firstName}
+                  Hi, {firstName} 👋
                 </span>
                 <button
                   type="button"
@@ -177,7 +215,7 @@ export default function Navbar() {
                 )}
 
                 <p className="px-1 text-sm font-semibold text-primary-dark">
-                  Welcome, {firstName}
+                  Hi, {firstName} 👋
                 </p>
                 <button
                   type="button"

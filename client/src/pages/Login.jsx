@@ -56,13 +56,20 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex">
+    <div className="min-h-[calc(100vh-4rem)] flex relative overflow-hidden bg-gradient-to-br from-beige-light/30 via-white to-secondary/10">
+      {/* Subtle background blobs for the glass effect to catch */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-primary/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" />
+      <div className="absolute bottom-[-10%] right-[40%] w-96 h-96 bg-secondary/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style={{ animationDelay: '2s' }} />
+
       {/* ── Left: Illustration Panel ──────────────── */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-primary/90 via-secondary/80 to-primary-dark/90 items-center justify-center auth-pattern">
+      <div
+        className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center z-10"
+        style={{ background: 'linear-gradient(135deg, #4a7191 0%, #5d8aad 40%, #81A6C6 75%, #AACDDC 100%)' }}
+      >
         {/* Floating decorative shapes */}
-        <div className="absolute top-16 left-12 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
-        <div className="absolute bottom-20 right-16 w-40 h-40 rounded-full bg-white/8 blur-2xl" />
-        <div className="absolute top-1/3 right-12 w-24 h-24 rounded-full bg-beige-light/10 blur-xl" />
+        <div className="absolute top-16 left-12 w-32 h-32 rounded-full blur-2xl" style={{background:'rgba(255,255,255,0.12)'}} />
+        <div className="absolute bottom-20 right-16 w-40 h-40 rounded-full blur-2xl" style={{background:'rgba(255,255,255,0.09)'}} />
+        <div className="absolute top-1/3 right-12 w-24 h-24 rounded-full blur-xl" style={{background:'rgba(243,227,208,0.12)'}} />
 
         <div className="relative z-10 max-w-md text-center px-8">
           {/* Decorative paw cluster */}
@@ -70,8 +77,8 @@ export default function Login() {
             <PawIcon className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 text-white/25 rotate-[-15deg]" />
             <PawIcon className="absolute top-10 left-6 w-10 h-10 text-white/15 rotate-[20deg]" />
             <PawIcon className="absolute top-12 right-6 w-12 h-12 text-white/20 rotate-[-30deg]" />
-            <PawIcon className="absolute bottom-6 left-1/2 -translate-x-1/2 w-20 h-20 text-white/30" />
-            <PawIcon className="absolute bottom-0 left-10 w-8 h-8 text-white/10 rotate-[45deg]" />
+            <PawIcon className="absolute bottom-6 left-1/2 -translate-x-1/2 w-24 h-24 text-white/30" />
+            <PawIcon className="absolute bottom-4 right-10 w-8 h-8 text-white/10 rotate-[40deg]" />
           </div>
 
           <h2 className="text-3xl font-bold text-white mb-3">Welcome Back!</h2>
@@ -100,8 +107,8 @@ export default function Login() {
       </div>
 
       {/* ── Right: Form Panel ─────────────────────── */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-surface">
-        <div className="w-full max-w-md animate-fade-in-up">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 relative z-10">
+        <div className="w-full max-w-md glass-panel p-8 sm:p-10 rounded-3xl animate-fade-in-up">
           {/* Brand */}
           <Link to="/" className="flex items-center gap-2 mb-10 group">
             <PawIcon className="w-8 h-8 text-primary group-hover:text-primary-dark transition-colors" />

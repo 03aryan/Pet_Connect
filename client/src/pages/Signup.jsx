@@ -61,7 +61,13 @@ export default function Signup() {
     setIsSubmitting(true);
 
     try {
-      await signup(form);
+      // Merge firstName + lastName into `name` as the backend expects
+      await signup({
+        name: `${form.firstName.trim()} ${form.lastName.trim()}`,
+        email: form.email,
+        password: form.password,
+        role: form.role,
+      });
       navigate("/", { replace: true });
     } catch (error) {
       setSubmitError(
@@ -92,10 +98,14 @@ export default function Signup() {
   })();
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex">
+    <div className="min-h-[calc(100vh-4rem)] flex relative overflow-hidden bg-gradient-to-br from-secondary/10 via-white to-beige-light/30">
+      {/* Subtle background blobs for the glass effect */}
+      <div className="absolute top-[-5%] right-[-10%] w-[30rem] h-[30rem] bg-secondary/30 rounded-full mix-blend-multiply filter blur-[80px] opacity-70 animate-float" />
+      <div className="absolute bottom-[-10%] left-[30%] w-[25rem] h-[25rem] bg-primary/20 rounded-full mix-blend-multiply filter blur-[80px] opacity-70 animate-float" style={{ animationDelay: '1.5s' }} />
+
       {/* ── Left: Form Panel ──────────────────────── */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-surface">
-        <div className="w-full max-w-lg animate-fade-in-up">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 relative z-10">
+        <div className="w-full max-w-lg glass-panel p-8 sm:p-10 rounded-3xl animate-fade-in-up">
           {/* Brand */}
           <Link to="/" className="flex items-center gap-2 mb-8 group">
             <PawIcon className="w-8 h-8 text-primary group-hover:text-primary-dark transition-colors" />
@@ -311,10 +321,15 @@ export default function Signup() {
       </div>
 
       {/* ── Right: Illustration Panel ─────────────── */}
-      <div className="hidden lg:flex lg:w-5/12 relative overflow-hidden bg-gradient-to-br from-secondary/80 via-primary/70 to-primary-dark/90 items-center justify-center auth-pattern">
+      <div
+        className="hidden lg:flex lg:w-5/12 relative overflow-hidden items-center justify-center"
+        style={{ background: 'linear-gradient(135deg, #4a7191 0%, #5d8aad 40%, #81A6C6 75%, #AACDDC 100%)' }}
+      >
         {/* Floating decorative shapes */}
-        <div className="absolute top-20 right-16 w-36 h-36 rounded-full bg-white/10 blur-2xl" />
-        <div className="absolute bottom-24 left-12 w-44 h-44 rounded-full bg-white/8 blur-2xl" />
+        <div className="absolute top-20 right-16 w-36 h-36 rounded-full blur-2xl" style={{background:'rgba(255,255,255,0.12)'}} />
+        <div className="absolute bottom-24 left-12 w-44 h-44 rounded-full blur-2xl" style={{background:'rgba(255,255,255,0.08)'}} />
+        <div className="absolute top-1/3 left-1/4 w-56 h-56 rounded-full blur-3xl" style={{background:'rgba(255,255,255,0.06)'}} />
+
 
         <div className="relative z-10 max-w-sm text-center px-8">
           {/* Decorative paw cluster */}

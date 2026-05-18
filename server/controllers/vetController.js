@@ -171,8 +171,9 @@ exports.upsertMyVetProfile = async (req, res, next) => {
 /* ── GET /api/vets/me/profile  (protected) ─────── */
 exports.getMyVetProfile = async (req, res, next) => {
   try {
-    if (!ensureVetRole(req, res)) return;
-
+    // NOTE: No role check here — users may visit onboarding before they are
+    // assigned the "vet" role (first-time setup). We simply return 404 when
+    // no profile exists yet, and the frontend handles it gracefully.
     const vet = await VetProfile.findOne({ user: req.user._id })
       .populate("user", "name email role")
       .lean();

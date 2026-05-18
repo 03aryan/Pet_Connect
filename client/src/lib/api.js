@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+// In development, Vite proxies /api → localhost:5000 (see vite.config.js).
+// In production, VITE_API_URL should be set to the deployed backend URL.
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
 export { API_BASE_URL };
 
